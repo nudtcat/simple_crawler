@@ -80,7 +80,7 @@ class URLQueue(threading.Thread):
 
 
 if __name__=="__main__":
-	url_queue.put([r'http://www.nankai.edu.cn/',1])
+	url_queue.put([r'http://www.sina.com.cn/',1])
 	list=[]
 
 	u=URLQueue(url_queue, 2)
