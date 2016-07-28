@@ -40,6 +40,8 @@ class ConsumerThread(threading.Thread):
 				print "Warehouse is empty"
 				condition.wait()
 				print "Consumer is notified by producer"
+				condition.notify()
+				condition.release()
 			else:
 				warehouse.pop()
 				print "Consumer is working, NUM: " + str(len(warehouse))
