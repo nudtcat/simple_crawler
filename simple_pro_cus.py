@@ -24,8 +24,8 @@ class ProducerThread(threading.Thread):
 			else:
 				warehouse.append(1)
 				print "Producer is working, NUM: " + str(len(warehouse))
-				condition.notify()
-				condition.release()
+			condition.notify()
+			condition.release()
 			time.sleep(random.random())
 
 
@@ -40,13 +40,11 @@ class ConsumerThread(threading.Thread):
 				print "Warehouse is empty"
 				condition.wait()
 				print "Consumer is notified by producer"
-				condition.notify()
-				condition.release()
 			else:
 				warehouse.pop()
 				print "Consumer is working, NUM: " + str(len(warehouse))
-				condition.notify()
-				condition.release()
+			condition.notify()
+			condition.release()
 			time.sleep(random.random())
 
 
@@ -57,7 +55,7 @@ if __name__ == "__main__":
 		p = ProducerThread()
 		p_list.append(p)
 		p.start()
-	for i in range(2):
+	for i in range(6):
 		c = ConsumerThread()
 		c_list.append(c)
 		c.start()
