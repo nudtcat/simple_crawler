@@ -16,7 +16,6 @@ logger.warn("start")
 
 url_queue = Queue.Queue()
 hash_set = set()  # 并发问题,加锁
-lock = threading.RLock()
 
 headers = {
 	"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.11; rv:47.0) Gecko/20100101 Firefox/47.0",
@@ -34,7 +33,7 @@ def parser_html(url, html):
 
 def filter_links(links):
 	tags = ['a', 'iframe', 'frame']
-	blacklist = ['doc', 'pdf', 'mp4', 'jpg', 'jpeg']
+	blacklist = ['doc', 'pdf', 'mp4', 'jpg', 'jpeg','docx','xls','xlsx','mp3','apk']
 	results = []
 	for link in links:
 		if (link[0].tag in tags) and (link[2].split(".")[-1] not in blacklist):
@@ -43,20 +42,19 @@ def filter_links(links):
 
 
 def is_repeat(link):
-	lock.acquire()
+
 	md5sum = hashlib.md5(link).hexdigest()
 	if md5sum in hash_set:
-		lock.release()
 		return True
 	else:
 		hash_set.add(md5sum)
-		lock.release()
 		return False
 
 
 def save_resource(url, req, cur_deep):
 	#多线程
-	print url, cur_deep, hashlib.md5(url).hexdigest()
+	print hashlib.md5(url).hexdigest(),cur_deep,url
+	pass
 
 
 class Spider(threading.Thread):
@@ -71,9 +69,9 @@ class Spider(threading.Thread):
 				url_pair = self.url_queue.get(timeout=5)
 				url = url_pair[0]
 				cur_deep = url_pair[1]
-				logger.warn(self.name + " Get From Queue: " + url)
+				logger.warn("Queue_len:"+str(url_queue.qsize())+" "+self.name +" "+ url)
 			except Queue.Empty:
-				logger.warn(self.name + " timeout,thread end.")
+				logger.warn("Queue_len:"+str(url_queue.qsize())+" "+self.name + " timeout,thread end.")
 				break
 
 			try:
@@ -91,14 +89,17 @@ class Spider(threading.Thread):
 				pass
 			self.url_queue.task_done()
 
-
-if __name__ == "__main__":
-	url_queue.put([r'http://www.sina.com.cn/', 1])
+def main_logic(url,deep,thread_num):
+	url_queue.put([url, 1])
+	hash_set.add(hashlib.md5(url).hexdigest())
 	list = []
-	for i in range(10):
-		u = Spider(url_queue, 2)
+	for i in range(thread_num):
+		u=Spider(url_queue,deep)
 		list.append(u)
 		u.start()
 	for u in list:
 		u.join()
-	logger.warn("==== The End ====")
+
+if __name__ == "__main__":
+	main_logic(r"http://www.nankai.edu.cn",3,15)
+
